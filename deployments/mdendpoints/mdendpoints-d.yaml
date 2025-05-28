@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mdendpoints-d  
+  namespace: mdendpoints
+  labels:
+    app: mdendpoints-d
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mdendpoints-d
+  template:
+    metadata:
+      labels:
+        app: mdendpoints-d
+    spec:
+      containers:
+      - name: mdendpoints-d
+        image: mdendpoints-image
+        imagePullPolicy: Never # Use the local image
+        env:
+        - name: API_TENANT_ID
+          valueFrom:
+            secretKeyRef:
+              name: mdendpoints-secrets
+              key: API_TENANT_ID
+        - name: API_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: mdendpoints-secrets
+              key: API_CLIENT_ID       
+        - name: API_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: mdendpoints-secrets
+              key: API_CLIENT_SECRET     
+        - name: SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mdendpoints-secrets
+              key: SQL_PASSWORD                                                                
+        - name: SQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: mdendpoints-cm
+              key: SQL_HOST
+        - name: SQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: mdendpoints-cm
+              key: SQL_DATABASE
+        - name: SQL_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: mdendpoints-cm
+              key: SQL_USERNAME
+        - name: SQL_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: mdendpoints-cm
+              key: SQL_PORT
+        - name: BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: mdendpoints-cm
+              key: BASE_URL
+

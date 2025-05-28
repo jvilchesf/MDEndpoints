@@ -1,0 +1,65 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mdendpoints-cj
+  namespace: mdendpoints
+spec:
+  schedule: "0 6 * * *"  # Every day at 6:00 AM
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: mdendpoints-cj
+        spec:
+          containers:
+          - name: mdendpoints-cj
+            image: mdendpoints-image
+            imagePullPolicy: Never
+            env:
+            - name: API_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mdendpoints-secrets
+                  key: API_TENANT_ID
+            - name: API_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mdendpoints-secrets
+                  key: API_CLIENT_ID       
+            - name: API_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: mdendpoints-secrets
+                  key: API_CLIENT_SECRET     
+            - name: SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mdendpoints-secrets
+                  key: SQL_PASSWORD                                                                
+            - name: SQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: mdendpoints-cm
+                  key: SQL_HOST
+            - name: SQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: mdendpoints-cm
+                  key: SQL_DATABASE
+            - name: SQL_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mdendpoints-cm
+                  key: SQL_USERNAME
+            - name: SQL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: mdendpoints-cm
+                  key: SQL_PORT
+            - name: BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mdendpoints-secrets
+                  key: BASE_URL
+          restartPolicy: OnFailure
