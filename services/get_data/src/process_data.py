@@ -46,7 +46,6 @@ def remove_empty_values(
                 
     end_cleaning_time = time.time()
     time_cleaning = end_cleaning_time - start_cleaning_time                
-    logger.info(f"Removing empty value took {time_cleaning:.2f} seconds for {len(result)} rows")
 
     return new_result_list
 

@@ -2,6 +2,9 @@ from config import Settings
 from database import Database
 from api import API
 from loguru import logger
+from datetime import datetime
+
+import time
 
 def main(
     api: API,
@@ -14,19 +17,38 @@ def main(
 
     # 2. Iterate over the endpoint configs and get the data
     for endpoint_name, endpoint_config in endpoint_configs.items():    
+        
+        table_name = endpoint_config['table_name']
 
-        # 2.0 Clean the table in the database
-        db.clean_table(endpoint_config['table_name'], conn)
+        # Record start time for logs 
+        start_time_endpoint = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]  # Format: 2025-05-29 04:34:31.457
+        
+        try:
+            # 2.1 Clean the table in the database
+            db.clean_table(table_name, conn)
 
-        # 2.1. Get the data
-        success = api.get_and_save_data(endpoint_config, conn, db)
+            # 2.3. Get the data
+            success,total_rows = api.get_and_save_data(endpoint_config, conn, db)
+
+            # Data for logs
+            end_time_endpoint = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]  # Format: 2025-05-29 04:34:31.457
+
+        except Exception as e:    
+            logger.info(f"Error processing table: {table_name}")
+            logger.info(f"{e}")
+            success = False
+            total_rows = 0
+            end_time_endpoint = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        
+        # 2.4 Save the status in the database table
+        status = "SUCCESS" if success else "FAILED"
+        db.log_status_process(table_name, start_time_endpoint, end_time_endpoint, status, total_rows, conn)
 
         if not success:
             logger.error(f"Error getting data from the API for table {endpoint_config['table_name']}")
-            break
+            continue
         else:
             logger.info(f"Data saved successfully for table {endpoint_config['table_name']}")
-            logger.info("--------------------------------")
 
 
 if __name__ == "__main__":

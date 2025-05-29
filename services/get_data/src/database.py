@@ -59,6 +59,7 @@ class Database:
             cursor = conn.cursor()
             cursor.execute(query)
             conn.commit()
+            logger.info("--------------------------------")
             logger.info(f"Table {table_name} cleaned")
         except pyodbc.Error as e:
             logger.error(f"Error cleaning table {table_name}", error=str(e))
@@ -98,23 +99,29 @@ class Database:
         table_name = endpoint_config['table_name']
 
         # Get columns from database
-        columns = self.get_table_columns(conn, table_name)
+        columns_db = self.get_table_columns(conn, table_name)
 
-        # Some tables have ID autoincrement, I have to remove it before filter dataframe
-        columns = [col for col in columns if col != "ID"]
-
-        # Filter columns in the data dictionary
         # If you convert to DataFrame first
-        df = pd.DataFrame(data)
+        df = pd.DataFrame(data)  
+        # Check which columns exist in both dataframe and database
+        available_df_columns = df.columns.tolist()
+        valid_columns = [col for col in columns_db if col in available_df_columns]
+        
+        # Validate database table and data api exctracted have same columns
+        if len(columns_db) != len(available_df_columns):
+            logger.info(f"{columns_db=}")
+            logger.info(f"Available_df_columns: {available_df_columns}")
+            logger.info(f"Valid_columns       : {valid_columns}")
+            logger.error(f"Database table and data api have different number of columns, it was fixed...")
 
-        data = df[columns]  # This will only keep the specified columns
+        data = df[valid_columns]  # This will only keep the specified columns
 
         # Convert to list of tuples
         data_as_tuples = data.to_records(index=False).tolist()
 
         #Creating place holders
-        insert_columns = f"({','.join(columns)})"
-        place_holders= f"({','.join( '?' for col in columns)})"
+        insert_columns = f"({','.join(valid_columns)})"
+        place_holders= f"({','.join( '?' for col in valid_columns)})"
 
         # Create query (removed extra quote)
         query = f"""
@@ -134,10 +141,50 @@ class Database:
             end_load_data = time.time()
             total_load_data = end_load_data - start_load_data
 
-            logger.info(f"Data loaded into the mssql database, it took {total_load_data} seconds")
+            logger.info(f"Data loaded into {table_name}: {len(data_as_tuples)} rows in {total_load_data:.2f} seconds")
             return True
         except Exception as e:
-            logger.info(f"Error loading data into the database, table_name: {table_name}, n_rows= {len(data_as_tuples)}")
-            logger.info(f"{e}")
-            logger.info(f"{query}")
+            logger.error(f"Error loading data into the database, table_name: {table_name}, n_rows= {len(data_as_tuples)}")
+            logger.error(f"Error type: {type(e).__name__}")
+            logger.error(f"Error message: {str(e)}")
+            logger.error(f"Query: {query}")
+            
+            # Try to get more specific error information
+            if hasattr(e, 'args') and e.args:
+                logger.error(f"Error args: {e.args}")
+            
+            return False
+
+
+    def log_status_process(self,
+                           table_name: str,
+                           start_time_endpoint: str,
+                           end_time_endpoint: str, 
+                           status: str, 
+                           total_rows: int,
+                           conn: pyodbc.Connection
+                           ) -> bool:
+
+        """
+        Save status process in a database table called ep_execution_log
+        """
+
+        # Create query - removed extra quote and adjusted parameters
+        query = """
+            INSERT INTO ep_execution_log (table_name, start_time_endpoint, end_time_endpoint, status, total_rows)
+            VALUES (?, ?, ?, ?, ?)
+            """
+        
+        # Initialize variables
+        cursor = conn.cursor()
+
+        try:
+            logger.info(f"Saving process status in the table ep_execution_log with values: {table_name}, {start_time_endpoint}, {end_time_endpoint}, {status}, {total_rows}")
+            cursor.execute(query, (table_name, start_time_endpoint, end_time_endpoint, status, total_rows))
+            conn.commit()   
+            return True
+        
+        except Exception as e:
+            logger.error(f"Error logging status process in the database table {table_name}")
+            logger.error(f"error = {e}")
             return False

@@ -309,15 +309,9 @@ CREATE TABLE ep_browser_extensions_inventory (
 
 -- 15. Browser Extensions Permissions (removed id column)
 CREATE TABLE ep_browser_extensions_permissions (
-    permissionName NVARCHAR(255),
-    description NTEXT,
-    extensionId NVARCHAR(255),
-    extensionName NVARCHAR(255),
-    extensionVersion NVARCHAR(50),
-    publisher NVARCHAR(255),
-    browserName NVARCHAR(50),
-    browserVersion NVARCHAR(50),
-    permissions NVARCHAR(255)
+    [key] NTEXT,
+    permissionName NTEXT,
+    description NTEXT
 );
 
 -- 16. Investigations (removed id column)
@@ -374,7 +368,7 @@ CREATE TABLE ep_indicators (
 
 -- 19. Info Gathering (removed id column)
 CREATE TABLE ep_info_gathering (
-    exportFiles NVARCHAR(255),
+    exportFiles NTEXT,
     generatedTime NVARCHAR(255)
 );
 
@@ -392,18 +386,28 @@ CREATE TABLE ep_library_files (
     score NVARCHAR(255)
 );
 
--- 21. Machine Actions (removed id column)
+-- 21. Machine Actions (updated to match API data structure)
 CREATE TABLE ep_machine_actions (
+    id NVARCHAR(255),
     type NVARCHAR(255),
-    scope NVARCHAR(255),
+    title NVARCHAR(500),
     requestor NVARCHAR(255),
     requestorComment NTEXT,
     status NVARCHAR(255),
     machineId NVARCHAR(255),
     computerDnsName NVARCHAR(255),
-    creationTimeUtc NVARCHAR(255),
-    lastUpdateTimeUtc NVARCHAR(255),
-    relatedFileInfo NVARCHAR(255)
+    creationDateTimeUtc NVARCHAR(255),
+    lastUpdateDateTimeUtc NVARCHAR(255),
+    cancellationRequestor NVARCHAR(255),
+    cancellationComment NTEXT,
+    cancellationDateTimeUtc NVARCHAR(255),
+    errorHResult NVARCHAR(255),
+    scope NVARCHAR(255),
+    externalId NVARCHAR(255),
+    requestSource NVARCHAR(255),
+    relatedFileInfo NVARCHAR(500),
+    commands NTEXT,
+    troubleshootInfo NTEXT
 );
 
 -- 22. Exposure Score by Machine Groups (removed constraints)
@@ -477,13 +481,36 @@ CREATE TABLE ep_baseline_configurations (
     isCustom NVARCHAR(50)
 );
 
--- 28. Software (removed auto-incremental software_id column)
+-- 28. Software (updated to match API data structure)
 CREATE TABLE ep_software (
+    id NVARCHAR(255),
     name NVARCHAR(500),
     vendor NVARCHAR(500),
     weaknesses NTEXT,
     publicExploit NVARCHAR(50),
     activeAlert NVARCHAR(50),
     exposedMachines NTEXT,
-    impactScore NVARCHAR(50)
-); 
+    installedMachines NTEXT,
+    impactScore NVARCHAR(50),
+    isNormalized NVARCHAR(50),
+    category NVARCHAR(255),
+    distributions NTEXT
+);
+
+-- Drop table if it exists
+IF OBJECT_ID('dbo.ep_execution_log', 'U') IS NOT NULL 
+    DROP TABLE dbo.ep_execution_log;
+GO
+
+-- Create the execution log table
+CREATE TABLE ep_execution_log (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    table_name NVARCHAR(255) NOT NULL,
+    start_time_endpoint NVARCHAR(255) NOT NULL,
+    end_time_endpoint NVARCHAR(255) NOT NULL,
+    status NVARCHAR(50) NOT NULL,
+    total_rows INT NULL,
+    created_at DATETIME2(3) DEFAULT GETDATE(),
+    updated_at DATETIME2(3) DEFAULT GETDATE()
+);
+GO

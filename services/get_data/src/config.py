@@ -21,151 +21,167 @@ class Settings(BaseSettings):
 
     # Endpoint configurations for data processing
     ENDPOINT_CONFIGS :dict = {
-        "vulnerabilities_by_machine": {
-            "endpoint": "vulnerabilities/machinesVulnerabilities",
-            "table_name": "ep_vulnerabilities_by_machine",
-            "pagesize": 10000, 
-        },
-        "device_av_info": {
-            "endpoint": "deviceavinfo",
-            "table_name": "ep_device_av_info",
-            "pagesize": 10000,
-        },
-        "vulnerabilities": {
-            "endpoint": "vulnerabilities",
-            "table_name": "ep_vulnerabilities",
-            "pagesize": 8000,
-        },
-        "machines": {
-            "endpoint": "machines",
-            "table_name": "ep_machines",
-            "pagesize": 5000,
-        },
-        "software_inventory": {
-            "endpoint": "machines/SoftwareInventoryByMachine",
-            "table_name": "ep_software_inventory",
-            "pagesize": 200000,
-        },
-        "non_product_software_inventory": {
-            "endpoint": "machines/SoftwareInventoryNoProductCodeByMachine",
-            "table_name": "ep_non_product_software_inventory",
-            "pagesize": 200000,
-        },
-        "remediation_tasks": {
-            "endpoint": "remediationTasks",
-            "table_name": "ep_remediation_tasks",
-            "pagesize": 5000,
-        },
-        "alerts": {
-            "endpoint": "alerts",
-            "table_name": "ep_alerts",
-            "pagesize": 5000,
-        },
-        "device_authenticated_scan_definitions": {
-            "endpoint": "DeviceAuthenticatedScanDefinitions",
-            "table_name": "ep_device_authenticated_scan_definitions",
-            "pagesize": 100,
-        },
-        "device_authenticated_scan_agents": {
-            "endpoint": "DeviceAuthenticatedScanAgents",
-            "table_name": "ep_device_authenticated_scan_agents",
-            "pagesize": 100,
-        },
-        "browser_extensions_inventory": {
-            "endpoint": "Machines/BrowserExtensionsInventoryByMachine",
-            "table_name": "ep_browser_extensions_inventory",
-            "pagesize": 1000,
-        },
-        "browser_extensions_permissions": {
-            "endpoint": "browserextensions/permissionsinfo",
-            "table_name": "ep_browser_extensions_permissions",
-            "pagesize": 1000,
-        },
-        "investigations": {
-            "endpoint": "investigations",
-            "table_name": "ep_investigations",
-            "pagesize": 1000,
+        # "vulnerabilities_by_machine": {
+        #     "endpoint": "vulnerabilities/machinesVulnerabilities",
+        #     "table_name": "ep_vulnerabilities_by_machine",
+        #     "pagesize": 10000, 
+        #     "total_rows": 3099710,
+        # },
+        # "device_av_info": {
+        #     "endpoint": "deviceavinfo",
+        #     "table_name": "ep_device_av_info",
+        #     "pagesize": 10000,
+        #     "total_rows": 20826,
+        # },
+        # "vulnerabilities": {
+        #     "endpoint": "vulnerabilities",
+        #     "table_name": "ep_vulnerabilities",
+        #     "pagesize": 8000,
+        #     "total_rows": 261072,
+        # },
+        # "machines": {
+        #     "endpoint": "machines",
+        #     "table_name": "ep_machines",
+        #     "pagesize": 5000,
+        #     "total_rows": 64404,
+        # },
+        # "software_inventory": {
+        #     "endpoint": "machines/SoftwareInventoryByMachine",
+        #     "table_name": "ep_software_inventory",
+        #     "pagesize": 50000,
+        #     "total_rows": 879345, # TO: Memery error check
+        # },
+        # "non_product_software_inventory": {
+        #     "endpoint": "machines/SoftwareInventoryNoProductCodeByMachine",
+        #     "table_name": "ep_non_product_software_inventory",
+        #     "pagesize": 200000,
+        #     "total_rows": 2539196,
+        # },
+        # "remediation_tasks": {
+        #     "endpoint": "remediationTasks",
+        #     "table_name": "ep_remediation_tasks",
+        #     "pagesize": 5000,
+        #     "total_rows": 201,
+        # },
+        # "alerts": {
+        #     "endpoint": "alerts",
+        #     "table_name": "ep_alerts",
+        #     "pagesize": 5000,
+        #     "total_rows": 49855,
+        # },
+        # "device_authenticated_scan_definitions": {
+        #     "endpoint": "DeviceAuthenticatedScanDefinitions",
+        #     "table_name": "ep_device_authenticated_scan_definitions",
+        #     "pagesize": 100,
+        #     "total_rows": 55,
+        # },
+        # "device_authenticated_scan_agents": {
+        #     "endpoint": "DeviceAuthenticatedScanAgents",
+        #     "table_name": "ep_device_authenticated_scan_agents",
+        #     "pagesize": 100,
+        #     "total_rows": 7,
+        # },
+        # "browser_extensions_inventory": {
+        #     "endpoint": "Machines/BrowserExtensionsInventoryByMachine",
+        #     "table_name": "ep_browser_extensions_inventory",
+        #     "pagesize": 1000,
+        #     "total_rows": 10,
+        # },
+        # "browser_extensions_permissions": {
+        #     "endpoint": "browserextensions/permissionsinfo",
+        #     "table_name": "ep_browser_extensions_permissions",
+        #     "pagesize": 1000,
+        #     "total_rows": 0, # TO DO: Check Error message: ('String data, right truncation: length 582 buffer 510', 'HY000')
+        # },
+        # "investigations": {
+        #     "endpoint": "investigations",
+        #     "table_name": "ep_investigations",
+        #     "pagesize": 1000,
+        #     "total_rows": 2566,
+        # },
+        # "certificate_assessments": {
+        #     "endpoint": "machines/certificateAssessmentByMachine",
+        #     "table_name": "ep_certificate_assessments",
+        #     "pagesize": 100000,
+        #     "total_rows": 5788,
+        # },
+        # "indicators": {
+        #     "endpoint": "indicators",
+        #     "table_name": "ep_indicators",
+        #     "pagesize": 1000,
+        #     "total_rows": 1745,
+        # },
 
-        },
-        "certificate_assessments": {
-            "endpoint": "machines/certificateAssessmentByMachine",
-            "table_name": "ep_certificate_assessments",
-            "pagesize": 100000,
-        },
-        "indicators": {
-            "endpoint": "indicators",
-            "table_name": "ep_indicators",
-            "pagesize": 1000,
-        },
-        "info_gathering": {
-            "endpoint": "Machines/InfoGatheringExport",
-            "table_name": "ep_info_gathering",
-            "pagesize": 1000,
-        },
-        "library_files": {
-            "endpoint": "libraryfiles",
-            "table_name": "ep_library_files",
-            "pagesize": 1000,
-
-        },
-        "machine_actions": {
-            "endpoint": "machineactions",
-            "table_name": "ep_machine_actions",
-            "pagesize": 1000,
-        },
-        "exposure_score_by_machine_groups": {
-            "endpoint": "exposureScore/ByMachineGroups",
-            "table_name": "ep_exposure_score_by_machine_groups",
-            "columns": [
-                "time", "score", "rbacGroupName"
-            ],
-            "pagesize": 1000,
-            "unique_key": ["time"],
-            "deduplicate_on": ["time"],
-        },
+        # "info_gathering": {
+        #     "endpoint": "Machines/InfoGatheringExport",
+        #     "table_name": "ep_info_gathering",
+        #     "pagesize": 1000,
+        #     "total_rows": 0, 
+        # },
+        # "library_files": {
+        #     "endpoint": "libraryfiles",
+        #     "table_name": "ep_library_files",
+        #     "pagesize": 1000,
+        #     "total_rows": 16,
+        # },
+        # "machine_actions": {
+        #     "endpoint": "machineactions",
+        #     "table_name": "ep_machine_actions",
+        #     "pagesize": 1000,
+        #     "total_rows": 1475,
+        # },
+        # "exposure_score_by_machine_groups": {
+        #     "endpoint": "exposureScore/ByMachineGroups",
+        #     "table_name": "ep_exposure_score_by_machine_groups",
+        #     "pagesize": 1000,
+        #     "total_rows": 22,
+        # },
         "exposure_score": {
             "endpoint": "exposureScore",
             "table_name": "ep_exposure_score",
-            "columns": [
-                "id", "time", "score"
-            ],
             "pagesize": 1000,
-            "unique_key": "id",
-            "deduplicate_on": "id"
+            "total_rows": 0,
         },
         "configuration_score": {
             "endpoint": "configurationScore",
             "table_name": "ep_device_secure_score",
             "pagesize": 1000,
+            "total_rows": 0,
         },
-        "baseline_compliance_assessment": {
-            "endpoint": "machines/baselineComplianceAssessmentByMachine",
-            "table_name": "ep_baseline_compliance_assessment",
-            "pagesize": 5000,
-        },
-        "baseline_profiles": {
-            "endpoint": "baselineProfiles",
-            "table_name": "ep_baseline_profiles",
-            "pagesize": 1000,
-        },
-        "baseline_configurations": {
-            "endpoint": "baselineConfigurations",
-            "table_name": "ep_baseline_configurations",
-            "pagesize": 1000,
-        },
-        "software": {
-            "endpoint": "Software",
-            "table_name": "ep_software",
-            "pagesize": 5000,
-        },
-        "software_vulnerabilities_by_machine": {
-             "endpoint": "machines/SoftwareVulnerabilitiesByMachine",
-             "table_name": "ep_software_vulnerabilities_by_machine",
-             "pagesize": 100000,
-        },
-        "secure_config_assessment": {
-             "endpoint": "machines/SecureConfigurationsAssessmentByMachine",
-             "table_name": "ep_secure_config_assessment",
-             "pagesize": 100000,
-        }
+        # "baseline_compliance_assessment": {
+        #     "endpoint": "machines/baselineComplianceAssessmentByMachine",
+        #     "table_name": "ep_baseline_compliance_assessment",
+        #     "pagesize": 5000,
+        #     "total_rows": 15750,
+        # },
+        # "baseline_profiles": {
+        #     "endpoint": "baselineProfiles",
+        #     "table_name": "ep_baseline_profiles",
+        #     "pagesize": 1000,
+        #     "total_rows": 2,
+        # },
+        # "baseline_configurations": {
+        #     "endpoint": "baselineConfigurations",
+        #     "table_name": "ep_baseline_configurations",
+        #     "pagesize": 1000,
+        #     "total_rows": 315,
+        # },
+        # "software": {
+        #     "endpoint": "Software",
+        #     "table_name": "ep_software",
+        #     "pagesize": 5000,
+        #     "total_rows": 0,
+        # },
+        # "software_vulnerabilities_by_machine": {
+        #      "endpoint": "machines/SoftwareVulnerabilitiesByMachine",
+        #      "table_name": "ep_software_vulnerabilities_by_machine",
+        #      "pagesize": 100000,
+        #      "total_rows": 3105966,
+        # },
+        # "secure_config_assessment": {
+        #      "endpoint": "machines/SecureConfigurationsAssessmentByMachine",
+        #      "table_name": "ep_secure_config_assessment",
+        #      "pagesize": 100000,
+        #      "total_rows": 4458777,
+        # }
     }
