@@ -222,10 +222,10 @@ class API:
                 if len(data) < endpoint_config['pagesize']:
                     break
                     
-                count += 1
+                # count += 1
 
-                if count == 2:
-                    return True, total_rows_processed
+                # if count == 2:
+                #     return True, total_rows_processed
 
         # Final completion log
         if success:
