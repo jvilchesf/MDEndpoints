@@ -27,6 +27,7 @@ IF OBJECT_ID('dbo.ep_baseline_compliance_assessment', 'U') IS NOT NULL DROP TABL
 IF OBJECT_ID('dbo.ep_baseline_profiles', 'U') IS NOT NULL DROP TABLE dbo.ep_baseline_profiles;
 IF OBJECT_ID('dbo.ep_baseline_configurations', 'U') IS NOT NULL DROP TABLE dbo.ep_baseline_configurations;
 IF OBJECT_ID('dbo.ep_software', 'U') IS NOT NULL DROP TABLE dbo.ep_software;
+IF OBJECT_ID('dbo.ep_execution_log', 'U') IS NOT NULL DROP TABLE dbo.ep_execution_log;
 
 -- 1. Execution log table (removed id column)
 CREATE TABLE ep_endpoint_execution_log (
@@ -43,7 +44,8 @@ CREATE TABLE ep_endpoint_execution_log (
 
 -- 2. Vulnerabilities (removed id column)
 CREATE TABLE ep_vulnerabilities (
-    cveId NVARCHAR(255),
+    id NVARCHAR(255),
+    name NVARCHAR(255),
     description NTEXT,
     severity NVARCHAR(50),
     cvssV3 NVARCHAR(255),
@@ -52,12 +54,15 @@ CREATE TABLE ep_vulnerabilities (
     publishedOn NVARCHAR(255),
     updatedOn NVARCHAR(255),
     firstDetected NVARCHAR(255),
+    patchFirstAvailable NVARCHAR(255),
     publicExploit NVARCHAR(50),
     exploitVerified NVARCHAR(50),
     exploitInKit NVARCHAR(50),
+    exploitTypes NTEXT,
+    exploitUris NTEXT,
     cveSupportability NVARCHAR(50),
     tags NTEXT,
-    epss NTEXT
+    epss NVARCHAR(255)
 );
 
 -- 3. Vulnerabilities by Machine (removed id column)
@@ -73,6 +78,7 @@ CREATE TABLE ep_vulnerabilities_by_machine (
 
 -- 4. Device AV Info (removed id column)
 CREATE TABLE ep_device_av_info (
+    id NVARCHAR(255),
     machineId NVARCHAR(255),
     computerDnsName NVARCHAR(255),
     osKind NVARCHAR(50),
@@ -93,38 +99,56 @@ CREATE TABLE ep_device_av_info (
     avEngineUpdateTime NVARCHAR(255),
     avSignatureUpdateTime NVARCHAR(255),
     avPlatformUpdateTime NVARCHAR(255),
-    avSignaturePublishTime NVARCHAR(255),
     avIsSignatureUpToDate NVARCHAR(255),
     avIsEngineUpToDate NVARCHAR(255),
     avIsPlatformUpToDate NVARCHAR(255),
+    avSignaturePublishTime NVARCHAR(255),
+    avSignatureDataRefreshTime NVARCHAR(255),
+    cloudProtectionState NVARCHAR(255),
+    avModeDataRefreshTime NVARCHAR(255),
     rbacGroupName NVARCHAR(255),
     rbacGroupId NVARCHAR(255)
 );
 
 -- 5. Machines (removed id column)
 CREATE TABLE ep_machines (
+    id NVARCHAR(255),
+    mergedIntoMachineId NVARCHAR(255),
+    isPotentialDuplication NVARCHAR(255),
+    isExcluded NVARCHAR(255), 
+    exclusionReason NVARCHAR(255),
     computerDnsName NVARCHAR(255),
     firstSeen NVARCHAR(255),
     lastSeen NVARCHAR(255),
     osPlatform NVARCHAR(50),
-    version NTEXT,
+    osVersion NVARCHAR(255),
     osProcessor NVARCHAR(50),
+    version NTEXT,
     lastIpAddress NVARCHAR(50),
     lastExternalIpAddress NVARCHAR(50),
+    agentVersion NVARCHAR(255),
     osBuild NVARCHAR(255),
     healthStatus NVARCHAR(50),
+    deviceValue NVARCHAR(255),
     rbacGroupId NVARCHAR(255),
     rbacGroupName NVARCHAR(255),
     riskScore NVARCHAR(255),
     exposureLevel NVARCHAR(255),
     isAadJoined NVARCHAR(255),
     aadDeviceId NVARCHAR(255),
-    machineTags NVARCHAR(255)
+    machineTags NVARCHAR(255),
+    onboardingStatus NVARCHAR(255),
+    osArchitecture NVARCHAR(255),
+    managedBy NVARCHAR(255),
+    managedByStatus NVARCHAR(255),
+    ipAddresses NTEXT,
+    vmMetadata NTEXT
 );
 
 -- 6. Secure Configuration Assessment (removed constraints)
 CREATE TABLE ep_secure_config_assessment (
     deviceId NVARCHAR(255),
+    rbacGroupId NVARCHAR(255),
     rbacGroupName NVARCHAR(255),
     deviceName NVARCHAR(255),
     osPlatform NVARCHAR(50),
@@ -204,6 +228,7 @@ CREATE TABLE ep_software_vulnerabilities_by_machine (
 
 -- 10. Remediation Tasks (removed id column)
 CREATE TABLE ep_remediation_tasks (
+    id NVARCHAR(255),
     title NVARCHAR(255),
     createdOn NVARCHAR(255),
     requesterId NVARCHAR(255),
@@ -230,11 +255,13 @@ CREATE TABLE ep_remediation_tasks (
     nameId NVARCHAR(255),
     recommendedVersion NVARCHAR(50),
     recommendedVendor NVARCHAR(255),
-    recommendedProgram NVARCHAR(255)
+    recommendedProgram NVARCHAR(255),
+    recommendationReference NVARCHAR(255)
 );
 
 -- 11. Alerts (removed id column)
 CREATE TABLE ep_alerts (
+    id NVARCHAR(255),
     incidentId NVARCHAR(255),
     investigationId NVARCHAR(255),
     assignedTo NVARCHAR(255),
@@ -244,6 +271,7 @@ CREATE TABLE ep_alerts (
     determination NVARCHAR(255),
     investigationState NVARCHAR(50),
     detectionSource NVARCHAR(255),
+    detectorId NVARCHAR(255),
     category NVARCHAR(255),
     threatFamilyName NVARCHAR(255),
     title NVARCHAR(255),
@@ -260,12 +288,15 @@ CREATE TABLE ep_alerts (
     threatName NVARCHAR(255),
     mitreTechniques NTEXT,
     relatedUser NTEXT,
+    loggedOnUsers NTEXT,
     comments NTEXT,
-    evidence NTEXT
+    evidence NTEXT,
+    domains NTEXT
 );
 
 -- 12. Device Authenticated Scan Definitions (removed id column)
 CREATE TABLE ep_device_authenticated_scan_definitions (
+    id NVARCHAR(255),
     scanType NVARCHAR(50),
     scanName NVARCHAR(255),
     isActive NVARCHAR(255),
@@ -276,7 +307,8 @@ CREATE TABLE ep_device_authenticated_scan_definitions (
     targetType NVARCHAR(50),
     scanAuthenticationParams NTEXT,
     scannerAgent NTEXT,
-    latestScan NTEXT
+    latestScan NTEXT,
+    advancedActiveConfiguration NTEXT
 );
 
 -- 13. Device Authenticated Scan Agents (removed id column)
@@ -293,25 +325,24 @@ CREATE TABLE ep_device_authenticated_scan_agents (
 -- 14. Browser Extensions Inventory (removed constraints)
 CREATE TABLE ep_browser_extensions_inventory (
     deviceId NVARCHAR(255),
-    extensionId NVARCHAR(255),
-    deviceName NVARCHAR(255),
     rbacGroupId NVARCHAR(255),
     rbacGroupName NVARCHAR(255),
     installationTime NVARCHAR(255),
     browserName NVARCHAR(255),
+    extensionId NVARCHAR(255),
     extensionName NVARCHAR(255),
     extensionDescription NTEXT,
     extensionVersion NVARCHAR(50),
     extensionRisk NVARCHAR(50),
-    isActivated NVARCHAR(255),
-    permissions NTEXT
+    extensionVendor NVARCHAR(255),
+    isActivated NVARCHAR(255)
 );
 
 -- 15. Browser Extensions Permissions (removed id column)
 CREATE TABLE ep_browser_extensions_permissions (
-    [key] NTEXT,
-    permissionName NTEXT,
-    description NTEXT
+    [key] NVARCHAR(1000),
+    permissionName NVARCHAR(1000), 
+    description NVARCHAR(1000)
 );
 
 -- 16. Investigations (removed id column)
@@ -348,22 +379,37 @@ CREATE TABLE ep_certificate_assessments (
 
 -- 18. Indicators (removed id column)
 CREATE TABLE ep_indicators (
+    id NVARCHAR(255),
     indicatorValue NVARCHAR(255),
     indicatorType NVARCHAR(50),
     action NVARCHAR(50),
-    application NVARCHAR(255),
-    source NVARCHAR(255),
-    sourceType NVARCHAR(50),
-    title NVARCHAR(255),
-    creationTimeDateTimeUtc NVARCHAR(255),
     createdBy NVARCHAR(255),
+    severity NVARCHAR(50),
+    category NVARCHAR(255),
+    application NVARCHAR(255),
+    educateUrl NTEXT,
+    bypassDurationHours NVARCHAR(50),
+    title NVARCHAR(255),
+    description NTEXT,
+    recommendedActions NTEXT,
+    creationTimeDateTimeUtc NVARCHAR(255),
     expirationTime NVARCHAR(255),
     lastUpdateTime NVARCHAR(255),
     lastUpdatedBy NVARCHAR(255),
-    severity NVARCHAR(50),
-    description NTEXT,
-    recommendedActions NTEXT,
-    rbacGroupNames NTEXT
+    rbacGroupNames NTEXT,
+    rbacGroupIds NTEXT,
+    notificationId NVARCHAR(255),
+    notificationBody NTEXT,
+    version NVARCHAR(50),
+    mitreTechniques NTEXT,
+    historicalDetection NVARCHAR(50),
+    lookBackPeriod NVARCHAR(50),
+    generateAlert NVARCHAR(50),
+    additionalInfo NTEXT,
+    createdByDisplayName NVARCHAR(255),
+    externalId NVARCHAR(255),
+    createdBySource NVARCHAR(255),
+    certificateInfo NTEXT
 );
 
 -- 19. Info Gathering (removed id column)
@@ -381,9 +427,7 @@ CREATE TABLE ep_library_files (
     lastUpdatedTime NVARCHAR(255),
     createdBy NVARCHAR(255),
     hasParameters NVARCHAR(255),
-    parametersDescription NTEXT,
-    time NVARCHAR(255),
-    score NVARCHAR(255)
+    parametersDescription NTEXT
 );
 
 -- 21. Machine Actions (updated to match API data structure)
@@ -414,7 +458,8 @@ CREATE TABLE ep_machine_actions (
 CREATE TABLE ep_exposure_score_by_machine_groups (
     time NVARCHAR(255),
     score NVARCHAR(255),
-    rbacGroupName NVARCHAR(255)
+    rbacGroupName NVARCHAR(255),
+    rbacGroupId NVARCHAR(255)
 );
 
 -- 23. Exposure Score (removed id column)
@@ -431,6 +476,7 @@ CREATE TABLE ep_device_secure_score (
 
 -- 25. Baseline Compliance Assessment (removed id column)
 CREATE TABLE ep_baseline_compliance_assessment (
+    id NVARCHAR(255),
     configurationId NVARCHAR(255),
     deviceId NVARCHAR(255),
     deviceName NVARCHAR(255),
@@ -442,13 +488,17 @@ CREATE TABLE ep_baseline_compliance_assessment (
     isApplicable NVARCHAR(255),
     isCompliant NVARCHAR(255),
     dataCollectionTimeOffset NVARCHAR(50),
+    complianceCalculationTimeOffset NVARCHAR(50),
     recommendedValue NTEXT,
     currentValue NTEXT,
-    source NTEXT
+    source NTEXT,
+    isExempt NVARCHAR(255),
+    rawValue NTEXT
 );
 
 -- 26. Baseline Profiles (removed id column)
 CREATE TABLE ep_baseline_profiles (
+    id NVARCHAR(255),
     name NTEXT,
     description NTEXT,
     benchmark NTEXT,
@@ -460,12 +510,18 @@ CREATE TABLE ep_baseline_profiles (
     settingsNumber NVARCHAR(255),
     createdBy NVARCHAR(255),
     lastUpdatedBy NVARCHAR(255),
+    createdOnTimeOffset NVARCHAR(255),
+    lastUpdateTimeOffset NVARCHAR(255),
     passedDevices NVARCHAR(255),
-    totalDevices NVARCHAR(255)
+    totalDevices NVARCHAR(255),
+    rbacGroupIdsProfileScope NTEXT,
+    rbacGroupNamesProfileScope NTEXT,
+    deviceTagsProfileScope NTEXT
 );
 
 -- 27. Baseline Configurations (removed id column)
 CREATE TABLE ep_baseline_configurations (
+    id NVARCHAR(255),
     uniqueId NVARCHAR(255),
     benchmarkName NTEXT,
     benchmarkVersion NVARCHAR(50),
@@ -478,7 +534,8 @@ CREATE TABLE ep_baseline_configurations (
     remediation NTEXT,
     recommendedValue NTEXT,
     source NTEXT,
-    isCustom NVARCHAR(50)
+    isCustom NVARCHAR(50),
+    assessmentMethod NTEXT
 );
 
 -- 28. Software (updated to match API data structure)
@@ -496,11 +553,6 @@ CREATE TABLE ep_software (
     category NVARCHAR(255),
     distributions NTEXT
 );
-
--- Drop table if it exists
-IF OBJECT_ID('dbo.ep_execution_log', 'U') IS NOT NULL 
-    DROP TABLE dbo.ep_execution_log;
-GO
 
 -- Create the execution log table
 CREATE TABLE ep_execution_log (

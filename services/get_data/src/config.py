@@ -45,30 +45,6 @@ class Settings(BaseSettings):
         #     "pagesize": 5000,
         #     "total_rows": 64404,
         # },
-        # "software_inventory": {
-        #     "endpoint": "machines/SoftwareInventoryByMachine",
-        #     "table_name": "ep_software_inventory",
-        #     "pagesize": 50000,
-        #     "total_rows": 879345, # TO: Memery error check
-        # },
-        # "non_product_software_inventory": {
-        #     "endpoint": "machines/SoftwareInventoryNoProductCodeByMachine",
-        #     "table_name": "ep_non_product_software_inventory",
-        #     "pagesize": 200000,
-        #     "total_rows": 2539196,
-        # },
-        # "remediation_tasks": {
-        #     "endpoint": "remediationTasks",
-        #     "table_name": "ep_remediation_tasks",
-        #     "pagesize": 5000,
-        #     "total_rows": 201,
-        # },
-        # "alerts": {
-        #     "endpoint": "alerts",
-        #     "table_name": "ep_alerts",
-        #     "pagesize": 5000,
-        #     "total_rows": 49855,
-        # },
         # "device_authenticated_scan_definitions": {
         #     "endpoint": "DeviceAuthenticatedScanDefinitions",
         #     "table_name": "ep_device_authenticated_scan_definitions",
@@ -86,12 +62,6 @@ class Settings(BaseSettings):
         #     "table_name": "ep_browser_extensions_inventory",
         #     "pagesize": 1000,
         #     "total_rows": 10,
-        # },
-        # "browser_extensions_permissions": {
-        #     "endpoint": "browserextensions/permissionsinfo",
-        #     "table_name": "ep_browser_extensions_permissions",
-        #     "pagesize": 1000,
-        #     "total_rows": 0, # TO DO: Check Error message: ('String data, right truncation: length 582 buffer 510', 'HY000')
         # },
         # "investigations": {
         #     "endpoint": "investigations",
@@ -136,18 +106,18 @@ class Settings(BaseSettings):
         #     "pagesize": 1000,
         #     "total_rows": 22,
         # },
-        "exposure_score": {
-            "endpoint": "exposureScore",
-            "table_name": "ep_exposure_score",
-            "pagesize": 1000,
-            "total_rows": 0,
-        },
-        "configuration_score": {
-            "endpoint": "configurationScore",
-            "table_name": "ep_device_secure_score",
-            "pagesize": 1000,
-            "total_rows": 0,
-        },
+        # "exposure_score": {
+        #     "endpoint": "exposureScore",
+        #     "table_name": "ep_exposure_score",
+        #     "pagesize": 1000,
+        #     "total_rows": 0,
+        # },
+        # "configuration_score": {
+        #     "endpoint": "configurationScore",
+        #     "table_name": "ep_device_secure_score",
+        #     "pagesize": 1000,
+        #     "total_rows": 0,
+        # },
         # "baseline_compliance_assessment": {
         #     "endpoint": "machines/baselineComplianceAssessmentByMachine",
         #     "table_name": "ep_baseline_compliance_assessment",
@@ -183,5 +153,36 @@ class Settings(BaseSettings):
         #      "table_name": "ep_secure_config_assessment",
         #      "pagesize": 100000,
         #      "total_rows": 4458777,
-        # }
+        # },
+        # "remediation_tasks": {
+        #     "endpoint": "remediationTasks",
+        #     "table_name": "ep_remediation_tasks",
+        #     "pagesize": 5000,
+        #     "total_rows": 201,
+        # },
+        # "non_product_software_inventory": {
+        #     "endpoint": "machines/SoftwareInventoryNoProductCodeByMachine",
+        #     "table_name": "ep_non_product_software_inventory",
+        #     "pagesize": 200000,
+        #     "total_rows": 2539196,
+        # },
+        "software_inventory": {
+            "endpoint": "machines/SoftwareInventoryByMachine",
+            "table_name": "ep_software_inventory",
+            "pagesize": 50000,
+            "total_rows": 879345, # TO: Memery error check
+        },
+
+        "browser_extensions_permissions": {
+            "endpoint": "browserextensions/permissionsinfo",
+            "table_name": "ep_browser_extensions_permissions",
+            "pagesize": 1000,
+            "total_rows": 0, # TO DO: Check Error message: ('String data, right truncation: length 582 buffer 510', 'HY000')
+        },
+        "alerts": {
+            "endpoint": "alerts",
+            "table_name": "ep_alerts",
+            "pagesize": 5000,
+            "total_rows": 49855,
+        },
     }

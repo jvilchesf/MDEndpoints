@@ -52,7 +52,7 @@ class API:
         try:
             response = requests.post(token_url, data=data)
             response.raise_for_status()  # Raise an exception for HTTP errors
-            logger.info("Token obtained")
+            #logger.info("Token obtained")
             return response.json()['access_token']            
         except requests.exceptions.RequestException as e:
             logger.error("Failed to get access token", error=str(e))

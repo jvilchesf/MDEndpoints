@@ -2,6 +2,7 @@ import pyodbc
 from loguru import logger
 import time
 import pandas as pd
+import gc
 
 class Database:
     def __init__(self, 
@@ -62,6 +63,7 @@ class Database:
             logger.info("--------------------------------")
             logger.info(f"Table {table_name} cleaned")
         except pyodbc.Error as e:
+            logger.error("--------------------------------")
             logger.error(f"Error cleaning table {table_name}", error=str(e))
             raise
 
@@ -103,6 +105,11 @@ class Database:
 
         # If you convert to DataFrame first
         df = pd.DataFrame(data)  
+
+        # Free memory
+        del data
+        gc.collect()
+
         # Check which columns exist in both dataframe and database
         available_df_columns = df.columns.tolist()
         valid_columns = [col for col in columns_db if col in available_df_columns]
@@ -115,9 +122,10 @@ class Database:
             logger.error(f"Database table and data api have different number of columns, it was fixed...")
 
         data = df[valid_columns]  # This will only keep the specified columns
-
-        # Convert to list of tuples
-        data_as_tuples = data.to_records(index=False).tolist()
+    
+        # Convert to records with memory optimization
+        # Use itertuples instead of to_records for better memory efficiency
+        data_as_tuples = [tuple(row[1:]) for row in data.itertuples()]
 
         #Creating place holders
         insert_columns = f"({','.join(valid_columns)})"
@@ -141,7 +149,7 @@ class Database:
             end_load_data = time.time()
             total_load_data = end_load_data - start_load_data
 
-            logger.info(f"Data loaded into {table_name}: {len(data_as_tuples)} rows in {total_load_data:.2f} seconds")
+            #logger.info(f"Data loaded into {table_name}: {len(data_as_tuples)} rows in {total_load_data:.2f} seconds")
             return True
         except Exception as e:
             logger.error(f"Error loading data into the database, table_name: {table_name}, n_rows= {len(data_as_tuples)}")
