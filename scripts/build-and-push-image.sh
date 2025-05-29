@@ -13,4 +13,4 @@ fi
 
 echo "Building image ${image_name} for dev"
 docker build -t ${image_name}-image -f docker/${image_name}.Dockerfile .
-kind load docker-image ${image_name} --name knowbe4
+kind load docker-image ${image_name}-image --name knowbe4

@@ -5,12 +5,12 @@ metadata:
   namespace: mdendpoints
 data:
   # property-like keys; each key maps to a simple value
-  SQL_HOST: "172.17.0.3"
+  SQL_HOST: "172.17.0.1"
   SQL_DATABASE: "MDEndpoints"
   SQL_USERNAME: "sa"
   SQL_PORT: "11433"
 
-  BASE_URL: "https://api.securitycenter.microsoft.com/apiy"
+  BASE_URL: "https://api.securitycenter.microsoft.com/api"
 
 
 

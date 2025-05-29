@@ -7,5 +7,5 @@ build-and-push:
 
 # Deploy the service to the kubernetes kind cluster
 deploy:
-	./scripts/deploy.sh ${service_name}
+	./scripts/deploy.sh mdendpoints
 
