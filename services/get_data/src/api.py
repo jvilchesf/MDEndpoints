@@ -21,20 +21,26 @@ class API:
 
     def log_progress(self, current: int, total: int, table_name: str, milestones: dict) -> dict:
         """
-        Log progress at 25%, 50%, and 75% milestones
-        Returns updated milestones dict
+        Adaptive progress logging based on dataset size
         """
         if total > 0:
             progress_percentage = (current / total) * 100
             
-            for milestone in [25, 50, 75]:
-                if progress_percentage >= milestone and not milestones[milestone]:
-                    logger.info(f"Progress Update: {milestone}% completed for {table_name} "
-                              f"({current:,} / {total:,} rows)")
-                    milestones[milestone] = True
+            # For small datasets (< 1000 rows), only log at completion
+            if total < 20000:
+                if progress_percentage >= 100 and not milestones.get('completed', False):
+                    logger.info(f"Completed processing {table_name}: {current:,} rows")
+                    milestones['completed'] = True
+            else:
+                # For larger datasets, use milestone logging
+                for milestone in [25, 50, 75]:
+                    if progress_percentage >= milestone and not milestones.get(milestone, False):
+                        logger.info(f"Progress Update: {milestone}% completed for {table_name} "
+                                f"({current:,} / {total:,} rows)")
+                        milestones[milestone] = True
         
         return milestones
-
+    
     def get_token(self) -> str:
         """
         Get a token from the API
@@ -143,7 +149,6 @@ class API:
 
     def get_and_save_data(self,
                         endpoint_config: dict,
-                        conn: pyodbc.Connection,
                         db: Database
                         ) -> Tuple[bool, int]:
         """
@@ -178,48 +183,49 @@ class API:
 
         
         # Iterate over the endpoint config
-        while True:
+        with db.get_connection() as conn:
+            while True:
 
-            # Save start date in a variable to look for token expiration
-            # If start_table_iteration - now > 30 minutes, get a new token
-            if datetime.now() - start_table_iteration > timedelta(minutes=30):
-                token = self.get_token()
-                start_table_iteration = datetime.now()  # Reset the timer
+                # Save start date in a variable to look for token expiration
+                # If start_table_iteration - now > 30 minutes, get a new token
+                if datetime.now() - start_table_iteration > timedelta(minutes=30):
+                    token = self.get_token()
+                    start_table_iteration = datetime.now()  # Reset the timer
 
-            # Get the data from the api
-            data, next_link = self.run_query_api(endpoint_config, token, params, next_url)
+                # Get the data from the api
+                data, next_link = self.run_query_api(endpoint_config, token, params, next_url)
 
-            # process data
-            data = process_result(data)
+                # process data
+                data = process_result(data)
 
-            # Save total rows processed 
-            total_rows_processed += len(data)
-            
-            # Log progress at 25%, 50%, and 75% milestones
-            if estimated_total_rows > 0:
-                progress_milestones = self.log_progress(total_rows_processed, estimated_total_rows, endpoint_config['table_name'], progress_milestones)
-
-            # Save the data into the mssql database
-            success = db.save_data(data, endpoint_config, conn)
-            
-            if not success:
-                logger.error(f"Failed to save data for {endpoint_config['table_name']}")
-                break
-
-            # If there is a next link, update the next_url for pagination
-            if next_link:
-                next_url = next_link
-            else:
-                break
-
-            # if len data < pagesize, break
-            if len(data) < endpoint_config['pagesize']:
-                break
+                # Save total rows processed 
+                total_rows_processed += len(data)
                 
-            count += 1
+                # Log progress at 25%, 50%, and 75% milestones
+                if estimated_total_rows > 0:
+                    progress_milestones = self.log_progress(total_rows_processed, estimated_total_rows, endpoint_config['table_name'], progress_milestones)
 
-            if count == 2:
-                return True, total_rows_processed
+                # Save the data into the mssql database
+                success = db.save_data(data, endpoint_config, conn)
+                
+                if not success:
+                    logger.error(f"Failed to save data for {endpoint_config['table_name']}")
+                    break
+
+                # If there is a next link, update the next_url for pagination
+                if next_link:
+                    next_url = next_link
+                else:
+                    break
+
+                # if len data < pagesize, break
+                if len(data) < endpoint_config['pagesize']:
+                    break
+                    
+                count += 1
+
+                if count == 2:
+                    return True, total_rows_processed
 
         # Final completion log
         if success:

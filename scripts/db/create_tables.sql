@@ -198,31 +198,32 @@ CREATE TABLE ep_non_product_software_inventory (
 
 -- 9. Software Vulnerabilities by Machine (removed id column)
 CREATE TABLE ep_software_vulnerabilities_by_machine (
-    cveId NVARCHAR(255),
+    id NVARCHAR(255),
     deviceId NVARCHAR(255),
+    rbacGroupId NVARCHAR(255),
+    rbacGroupName NVARCHAR(255),
     deviceName NVARCHAR(255),
-    diskPaths NTEXT,
-    exploitabilityLevel NVARCHAR(50),
-    firstSeenTimestamp NVARCHAR(255),
-    lastSeenTimestamp NVARCHAR(255),
     osPlatform NVARCHAR(50),
     osVersion NVARCHAR(255),
     osArchitecture NVARCHAR(255),
-    rbacGroupName NVARCHAR(255),
-    recommendationReference NVARCHAR(255),
+    softwareVendor NVARCHAR(255),
+    softwareName NVARCHAR(255),
+    softwareVersion NVARCHAR(255),
+    cveId NVARCHAR(255),
+    vulnerabilitySeverityLevel NVARCHAR(255),
     recommendedSecurityUpdate NVARCHAR(255),
     recommendedSecurityUpdateId NVARCHAR(255),
     recommendedSecurityUpdateUrl NVARCHAR(255),
+    diskPaths NTEXT,
     registryPaths NTEXT,
-    securityUpdateAvailable NVARCHAR(255),
-    softwareName NVARCHAR(255),
-    softwareVendor NVARCHAR(255),
-    softwareVersion NVARCHAR(255),
-    vulnerabilitySeverityLevel NVARCHAR(255),
-    rbacGroupId NVARCHAR(255),
+    lastSeenTimestamp NVARCHAR(255),
+    firstSeenTimestamp NVARCHAR(255),
     endOfSupportStatus NVARCHAR(255),
     endOfSupportDate NVARCHAR(255),
+    exploitabilityLevel NVARCHAR(50),
+    recommendationReference NVARCHAR(255),
     cvssScore NVARCHAR(255),
+    securityUpdateAvailable NVARCHAR(255),
     cveMitigationStatus NVARCHAR(255)
 );
 
@@ -540,18 +541,18 @@ CREATE TABLE ep_baseline_configurations (
 
 -- 28. Software (updated to match API data structure)
 CREATE TABLE ep_software (
-    id NVARCHAR(255),
-    name NVARCHAR(500),
-    vendor NVARCHAR(500),
+    id NTEXT,
+    name NVARCHAR(255),
+    vendor NVARCHAR(255),
     weaknesses NTEXT,
-    publicExploit NVARCHAR(50),
-    activeAlert NVARCHAR(50),
+    publicExploit NTEXT,
+    activeAlert NTEXT,
     exposedMachines NTEXT,
     installedMachines NTEXT,
-    impactScore NVARCHAR(50),
-    isNormalized NVARCHAR(50),
-    category NVARCHAR(255),
-    distributions NTEXT
+    impactScore NTEXT,
+    isNormalized NTEXT,
+    category NTEXT,
+    distributions NVARCHAR(255)
 );
 
 -- Create the execution log table

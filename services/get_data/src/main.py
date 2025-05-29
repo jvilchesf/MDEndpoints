@@ -12,9 +12,6 @@ def main(
     endpoint_configs: dict,
 ):
 
-    # 1. Connect to the SQL Server
-    conn = db.connect()
-
     # 2. Iterate over the endpoint configs and get the data
     for endpoint_name, endpoint_config in endpoint_configs.items():    
         
@@ -25,10 +22,10 @@ def main(
         
         try:
             # 2.1 Clean the table in the database
-            db.clean_table(table_name, conn)
+            db.clean_table(table_name)
 
             # 2.3. Get the data
-            success,total_rows = api.get_and_save_data(endpoint_config, conn, db)
+            success,total_rows = api.get_and_save_data(endpoint_config, db)
 
             # Data for logs
             end_time_endpoint = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]  # Format: 2025-05-29 04:34:31.457
@@ -42,13 +39,14 @@ def main(
         
         # 2.4 Save the status in the database table
         status = "SUCCESS" if success else "FAILED"
-        db.log_status_process(table_name, start_time_endpoint, end_time_endpoint, status, total_rows, conn)
+        db.log_status_process(table_name, start_time_endpoint, end_time_endpoint, status, total_rows)
 
         if not success:
             logger.error(f"Error getting data from the API for table {endpoint_config['table_name']}")
             continue
         else:
             logger.info(f"Data saved successfully for table {endpoint_config['table_name']}")
+            logger.info(f"------------------------------------------")
 
 
 if __name__ == "__main__":
@@ -69,6 +67,7 @@ if __name__ == "__main__":
         username=settings.SQL_USERNAME,
         password=settings.SQL_PASSWORD,
         port=settings.SQL_PORT,
+        batch_size=settings.BATCH_SIZE,
     )
 
     main(

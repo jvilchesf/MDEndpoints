@@ -1,6 +1,6 @@
 import pyodbc
 from loguru import logger
-import time
+from contextlib import contextmanager
 import pandas as pd
 import gc
 
@@ -11,61 +11,61 @@ class Database:
         username: str,
         password: str,
         port: int,
+        batch_size: int,
     ):
         self.host = host
         self.database = database
         self.username = username
         self.password = password
         self.port = port
+        self.batch_size = batch_size
+        self.connection_string = self._build_connection_string()
 
-    def connect(self
-        ) -> pyodbc.Connection:
-        """"
-        Connects to the database using pyodbc
-        """
-
-        # Create the connection string with timeout parameters
-        connection_string = (
+    
+    def _build_connection_string(self):
+        return (
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-            f"SERVER={self.host},{self.port};"  # Use comma for port specification
-            f"PORT={self.port};"
+            f"SERVER={self.host},{self.port};"
             f"DATABASE={self.database};"
             f"UID={self.username};"
             f"PWD={self.password};"
             "TrustServerCertificate=yes;"
             "Encrypt=yes;"
             "Connection Timeout=30;"
+            "Command Timeout=300;"  # 5 minutes for long operations
             "Trust_Connection=yes"
         )
-        
+    @contextmanager
+    def get_connection(self):
+        """Context manager for database connections"""
+        conn = None
         try:
-            # Connect to the database
-            conn = pyodbc.connect(connection_string)
-            logger.info(f"Successfully connected to database {self.database}")
-            return conn
-        except pyodbc.Error as e:
-            logger.error(f"Failed to connect to database: {str(e)}")
+            conn = pyodbc.connect(self.connection_string)
+            conn.autocommit = False
+            #logger.info(f"Successfully connected to database {self.database}")
+            yield conn
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            logger.error(f"Database connection error: {e}")
             raise
+        finally:
+            if conn:
+                conn.close()
 
-    def clean_table(self, table_name: str, conn: pyodbc.Connection):
-        """
-        Cleans the table in the database
-        """
-
-        # Create the query
-        query = f"DELETE FROM {table_name} where 1=1"
+    def clean_table(self, table_name: str):
+        """Clean table with proper connection management"""
+        query = f"TRUNCATE TABLE {table_name}"  # TRUNCATE is faster than DELETE
         
-        try:
-            # Execute the query
-            cursor = conn.cursor()
-            cursor.execute(query)
-            conn.commit()
-            logger.info("--------------------------------")
-            logger.info(f"Table {table_name} cleaned")
-        except pyodbc.Error as e:
-            logger.error("--------------------------------")
-            logger.error(f"Error cleaning table {table_name}", error=str(e))
-            raise
+        with self.get_connection() as conn:
+            try:
+                cursor = conn.cursor()
+                cursor.execute(query)
+                conn.commit()
+                logger.info(f"Table {table_name} cleaned")
+            except pyodbc.Error as e:
+                logger.error(f"Error cleaning table {table_name}: {e}")
+                raise
 
     def get_table_columns(self, 
                     conn: pyodbc.Connection, 
@@ -92,7 +92,7 @@ class Database:
         
     def save_data(self, 
                 data: dict, 
-                endpoint_config: dict, 
+                endpoint_config: dict,
                 conn: pyodbc.Connection):
         """
         Save the data into the database 
@@ -121,47 +121,60 @@ class Database:
             logger.info(f"Valid_columns       : {valid_columns}")
             logger.error(f"Database table and data api have different number of columns, it was fixed...")
 
-        data = df[valid_columns]  # This will only keep the specified columns
-    
-        # Convert to records with memory optimization
-        # Use itertuples instead of to_records for better memory efficiency
-        data_as_tuples = [tuple(row[1:]) for row in data.itertuples()]
+        df = df[valid_columns]  # This will only keep the specified columns
 
-        #Creating place holders
-        insert_columns = f"({','.join(valid_columns)})"
-        place_holders= f"({','.join( '?' for col in valid_columns)})"
 
-        # Create query (removed extra quote)
-        query = f"""
-        INSERT INTO {table_name} {insert_columns} 
-        VALUES {place_holders}
-        """
 
-        # Initialize variables 
-        cursor = conn.cursor()
-        cursor.fast_executemany = True
+        total_rows = len(df)
+        for i in range(0, total_rows, self.batch_size):
 
-        try:
-            start_load_data = time.time()
-            cursor.executemany(query, data_as_tuples)
-            conn.commit()
+            # Initialize batch start and end for each iteration
+            batch_end = min(i + self.batch_size, total_rows)
 
-            end_load_data = time.time()
-            total_load_data = end_load_data - start_load_data
+            # Create batch to insert into the database
+            batch = df[i:batch_end]
 
-            #logger.info(f"Data loaded into {table_name}: {len(data_as_tuples)} rows in {total_load_data:.2f} seconds")
-            return True
-        except Exception as e:
-            logger.error(f"Error loading data into the database, table_name: {table_name}, n_rows= {len(data_as_tuples)}")
-            logger.error(f"Error type: {type(e).__name__}")
-            logger.error(f"Error message: {str(e)}")
-            logger.error(f"Query: {query}")
-            
-            # Try to get more specific error information
-            if hasattr(e, 'args') and e.args:
-                logger.error(f"Error args: {e.args}")
-            
-            return False
+            # Convert to records with memory optimization
+            # Use itertuples instead of to_records for better memory efficiency
+            data_as_tuples = [tuple(row[1:]) for row in batch.itertuples()]
+
+
+            #Creating place holders
+            insert_columns = f"({','.join(valid_columns)})"
+            place_holders= f"({','.join( '?' for col in valid_columns)})"
+
+            # Create query (removed extra quote)
+            query = f"""
+            INSERT INTO {table_name} {insert_columns} 
+            VALUES {place_holders}
+            """
+
+            # Initialize variables 
+            cursor = conn.cursor()
+            cursor.fast_executemany = True
+
+            try:
+                cursor.executemany(query, data_as_tuples)
+                conn.commit()
+                # Clean up
+                del data_as_tuples
+                gc.collect()
+
+            except Exception as e:
+                logger.error(f"Error loading data into the database, table_name: {table_name}, n_rows= {len(data_as_tuples)}")
+                logger.error(f"Error type: {type(e).__name__}")
+                logger.error(f"Error message: {str(e)}")
+                logger.error(f"Query: {query}")
+                
+                # Try to get more specific error information
+                if hasattr(e, 'args') and e.args:
+                    logger.error(f"Error args: {e.args}")
+                
+                return False
+
+#       logger.info(f"Successfully processed all {total_processed:,} rows for {table_name}")
+        return True
+
 
 
     def log_status_process(self,
@@ -170,7 +183,6 @@ class Database:
                            end_time_endpoint: str, 
                            status: str, 
                            total_rows: int,
-                           conn: pyodbc.Connection
                            ) -> bool:
 
         """
@@ -182,17 +194,17 @@ class Database:
             INSERT INTO ep_execution_log (table_name, start_time_endpoint, end_time_endpoint, status, total_rows)
             VALUES (?, ?, ?, ?, ?)
             """
-        
-        # Initialize variables
-        cursor = conn.cursor()
+        with self.get_connection() as conn:
+            # Initialize variables
+            cursor = conn.cursor()
 
-        try:
-            logger.info(f"Saving process status in the table ep_execution_log with values: {table_name}, {start_time_endpoint}, {end_time_endpoint}, {status}, {total_rows}")
-            cursor.execute(query, (table_name, start_time_endpoint, end_time_endpoint, status, total_rows))
-            conn.commit()   
-            return True
-        
-        except Exception as e:
-            logger.error(f"Error logging status process in the database table {table_name}")
-            logger.error(f"error = {e}")
-            return False
+            try:
+                logger.info(f"Saving process status in the table ep_execution_log with values: {table_name}, {start_time_endpoint}, {end_time_endpoint}, {status}, {total_rows}")
+                cursor.execute(query, (table_name, start_time_endpoint, end_time_endpoint, status, total_rows))
+                conn.commit()   
+                return True
+            
+            except Exception as e:
+                logger.error(f"Error logging status process in the database table {table_name}")
+                logger.error(f"error = {e}")
+                return False
