@@ -1,52 +1,62 @@
-from config import Settings
-from database import Database
-from api import API
-from loguru import logger
 from datetime import datetime
 
-import time
+from api import API
+from config import Settings
+from database import Database
+from loguru import logger
+
 
 def main(
     api: API,
     db: Database,
     endpoint_configs: dict,
 ):
-
     # 2. Iterate over the endpoint configs and get the data
-    for endpoint_name, endpoint_config in endpoint_configs.items():    
-        
-        table_name = endpoint_config['table_name']
+    for endpoint_name, endpoint_config in endpoint_configs.items():
+        table_name = endpoint_config["table_name"]
 
-        # Record start time for logs 
-        start_time_endpoint = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]  # Format: 2025-05-29 04:34:31.457
-        
+        # Record start time for logs
+        start_time_endpoint = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[
+            :-3
+        ]  # Format: 2025-05-29 04:34:31.457
+
         try:
             # 2.1 Clean the table in the database
             db.clean_table(table_name)
 
             # 2.3. Get the data
-            success,total_rows = api.get_and_save_data(endpoint_config, db)
+            success, total_rows = api.get_and_save_data(endpoint_config, db)
 
             # Data for logs
-            end_time_endpoint = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]  # Format: 2025-05-29 04:34:31.457
+            end_time_endpoint = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[
+                :-3
+            ]  # Format: 2025-05-29 04:34:31.457
 
-        except Exception as e:    
+        except Exception as e:
             logger.info(f"Error processing table: {table_name}")
-            logger.info(f"{e}")
+            logger.info(f"{str(e)}")
             success = False
             total_rows = 0
-            end_time_endpoint = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        
+            end_time_endpoint = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
         # 2.4 Save the status in the database table
         status = "SUCCESS" if success else "FAILED"
-        db.log_status_process(table_name, start_time_endpoint, end_time_endpoint, status, total_rows)
+        db.log_status_process(
+            table_name, start_time_endpoint, end_time_endpoint, status, total_rows
+        )
 
         if not success:
-            logger.error(f"Error getting data from the API for table {endpoint_config['table_name']}")
+            logger.error(
+                f"Error getting data from the API for table {
+                    endpoint_config['table_name']
+                }"
+            )
             continue
         else:
-            logger.info(f"Data saved successfully for table {endpoint_config['table_name']}")
-            logger.info(f"------------------------------------------")
+            logger.info(
+                f"Data saved successfully for table {endpoint_config['table_name']}"
+            )
+            logger.info("------------------------------------------")
 
 
 if __name__ == "__main__":

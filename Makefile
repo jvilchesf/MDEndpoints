@@ -9,3 +9,6 @@ build-and-push:
 deploy:
 	./scripts/deploy.sh mdendpoints
 
+build-deploy:
+	make build-and-push
+	make deploy

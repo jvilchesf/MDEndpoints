@@ -197,6 +197,9 @@ class API:
 
         # Get the parameters for the query pagesize is important to avoid pagination
         params = {"pagesize": str(endpoint_config["pagesize"])}
+        logger.info(
+            f"page size defined for this endpoint is {str(endpoint_config['pagesize'])}"
+        )
 
         # Track the next URL for pagination
         next_url = None
@@ -219,7 +222,7 @@ class API:
         # count for debugging
         count = 0
 
-        # Iterate over the endpoint config
+        # Iterate ovr the endpoint config
         with db.get_connection() as conn:
             while True:
                 # Save start date in a variable to look for token expiration
@@ -276,13 +279,13 @@ class API:
         if success:
             logger.info(
                 f"Completed processing {endpoint_config['table_name']}: {
-                    total_rows_processed:,                
+                    total_rows_processed
                 } total rows processed"
             )
         else:
             logger.error(
                 f"Failed processing {endpoint_config['table_name']}: {
-                    total_rows_processed:,                
+                    total_rows_processed
                 } rows processed before failure"
             )
 

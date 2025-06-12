@@ -19,27 +19,21 @@ class Settings(BaseSettings):
     # API Base URL
     BASE_URL: str
 
-    BATCH_SIZE: int = 5000
+    BATCH_SIZE: int = 10000
 
     # Endpoint configurations for data processing
     ENDPOINT_CONFIGS: dict = {
         "device_av_info": {
             "endpoint": "deviceavinfo",
             "table_name": "ep_device_av_info",
-            "pagesize": 200000,
+            "pagesize": 10000,
             "total_rows": 20826,
         },
         "software": {
             "endpoint": "Software",
             "table_name": "ep_software",
             "pagesize": 5000,
-            "total_rows": 0,
-        },
-        "vulnerabilities_by_machine": {
-            "endpoint": "vulnerabilities/machinesVulnerabilities",
-            "table_name": "ep_vulnerabilities_by_machine",
-            "pagesize": 10000,
-            "total_rows": 3099710,
+            "total_rows": 35000,
         },
         "vulnerabilities": {
             "endpoint": "vulnerabilities",
@@ -80,8 +74,14 @@ class Settings(BaseSettings):
         "software_vulnerabilities_by_machine": {
             "endpoint": "machines/SoftwareVulnerabilitiesByMachine",
             "table_name": "ep_software_vulnerabilities_by_machine",
-            "pagesize": 100000,  # 100000,
+            "pagesize": 200000,  # 100000,
             "total_rows": 3500000,
+        },
+        "vulnerabilities_by_machine": {
+            "endpoint": "vulnerabilities/machinesVulnerabilities",
+            "table_name": "ep_vulnerabilities_by_machine",
+            "pagesize": 10000,
+            "total_rows": 3099710,
         },
         "certificate_assessments": {
             "endpoint": "machines/certificateAssessmentByMachine",
