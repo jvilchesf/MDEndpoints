@@ -3,31 +3,31 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file='services/get_data/src/settings.env', env_file_encoding='utf-8'
+        env_file="services/get_data/src/settings.env", env_file_encoding="utf-8"
     )
 
-    SQL_HOST: str 
-    SQL_DATABASE: str 
-    SQL_USERNAME: str 
-    SQL_PASSWORD: str 
-    SQL_PORT: int 
+    SQL_HOST: str
+    SQL_DATABASE: str
+    SQL_USERNAME: str
+    SQL_PASSWORD: str
+    SQL_PORT: int
 
     # API Configuration
     API_TENANT_ID: str
     API_CLIENT_ID: str
     API_CLIENT_SECRET: str
     # API Base URL
-    BASE_URL: str 
+    BASE_URL: str
 
     BATCH_SIZE: int = 5000
 
     # Endpoint configurations for data processing
-    ENDPOINT_CONFIGS :dict = {
-        "software_vulnerabilities_by_machine": {
-            "endpoint": "machines/SoftwareVulnerabilitiesByMachine",
-            "table_name": "ep_software_vulnerabilities_by_machine",
-            "pagesize": 1000, #100000,
-            "total_rows": 3000000,
+    ENDPOINT_CONFIGS: dict = {
+        "device_av_info": {
+            "endpoint": "deviceavinfo",
+            "table_name": "ep_device_av_info",
+            "pagesize": 200000,
+            "total_rows": 20826,
         },
         "software": {
             "endpoint": "Software",
@@ -38,14 +38,8 @@ class Settings(BaseSettings):
         "vulnerabilities_by_machine": {
             "endpoint": "vulnerabilities/machinesVulnerabilities",
             "table_name": "ep_vulnerabilities_by_machine",
-            "pagesize": 10000, 
-            "total_rows": 3099710,
-        },
-        "device_av_info": {
-            "endpoint": "deviceavinfo",
-            "table_name": "ep_device_av_info",
             "pagesize": 10000,
-            "total_rows": 20826,
+            "total_rows": 3099710,
         },
         "vulnerabilities": {
             "endpoint": "vulnerabilities",
@@ -83,6 +77,12 @@ class Settings(BaseSettings):
             "pagesize": 1000,
             "total_rows": 2566,
         },
+        "software_vulnerabilities_by_machine": {
+            "endpoint": "machines/SoftwareVulnerabilitiesByMachine",
+            "table_name": "ep_software_vulnerabilities_by_machine",
+            "pagesize": 100000,  # 100000,
+            "total_rows": 3500000,
+        },
         "certificate_assessments": {
             "endpoint": "machines/certificateAssessmentByMachine",
             "table_name": "ep_certificate_assessments",
@@ -95,12 +95,11 @@ class Settings(BaseSettings):
             "pagesize": 1000,
             "total_rows": 1745,
         },
-
         "info_gathering": {
             "endpoint": "Machines/InfoGatheringExport",
             "table_name": "ep_info_gathering",
             "pagesize": 1000,
-            "total_rows": 0, 
+            "total_rows": 0,
         },
         "library_files": {
             "endpoint": "libraryfiles",
@@ -151,10 +150,10 @@ class Settings(BaseSettings):
             "total_rows": 315,
         },
         "secure_config_assessment": {
-             "endpoint": "machines/SecureConfigurationsAssessmentByMachine",
-             "table_name": "ep_secure_config_assessment",
-             "pagesize": 1000 , # 100000,
-             "total_rows": 4400000,
+            "endpoint": "machines/SecureConfigurationsAssessmentByMachine",
+            "table_name": "ep_secure_config_assessment",
+            "pagesize": 200000,  # 100000,
+            "total_rows": 4400000,
         },
         "remediation_tasks": {
             "endpoint": "remediationTasks",
@@ -165,21 +164,20 @@ class Settings(BaseSettings):
         "non_product_software_inventory": {
             "endpoint": "machines/SoftwareInventoryNoProductCodeByMachine",
             "table_name": "ep_non_product_software_inventory",
-            "pagesize": 1000, # 200000,
+            "pagesize": 200000,  # 200000,
             "total_rows": 2539196,
         },
         "software_inventory": {
             "endpoint": "machines/SoftwareInventoryByMachine",
             "table_name": "ep_software_inventory",
             "pagesize": 50000,
-            "total_rows": 879345, # TO: Memery error check
+            "total_rows": 879345,  # TO: Memery error check
         },
-
         "browser_extensions_permissions": {
             "endpoint": "browserextensions/permissionsinfo",
             "table_name": "ep_browser_extensions_permissions",
             "pagesize": 1000,
-            "total_rows": 0, # TO DO: Check Error message: ('String data, right truncation: length 582 buffer 510', 'HY000')
+            "total_rows": 0,
         },
         "alerts": {
             "endpoint": "alerts",

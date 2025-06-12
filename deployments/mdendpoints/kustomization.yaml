@@ -11,5 +11,6 @@ namespace: mdendpoints
 resources:
   - ./mdendpoints-cm.yaml
   - ./mdendpoints-s.yaml
-  - ./mdendpoints-d.yaml
+#  - ./mdendpoints-d.yaml
 #  - ./mdendpoints-cj.yaml
+  - ./mdendpoints-j.yaml

@@ -1,19 +1,16 @@
 apiVersion: batch/v1
-kind: CronJob
+kind: Job
 metadata:
-  name: mdendpoints-cj
+  name: mdendpoints-j
   namespace: mdendpoints
 spec:
-  schedule: "0 */6 * * *"  # Every day at 6:00 AM
-  jobTemplate:
-    spec:
       template:
         metadata:
           labels:
-            app: mdendpoints-cj
+            app: mdendpoints-j
         spec:
           containers:
-          - name: mdendpoints-cj
+          - name: mdendpoints-j
             image: mdendpoints-image
             imagePullPolicy: Never
             env:
@@ -62,4 +59,4 @@ spec:
                 configMapKeyRef:
                   name: mdendpoints-cm
                   key: BASE_URL
-          restartPolicy: OnFailure
+          restartPolicy: Never        
