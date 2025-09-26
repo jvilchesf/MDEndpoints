@@ -4,10 +4,10 @@ metadata:
   name: mdendpoints-secrets
   namespace: mdendpoints
 data:
-  API_TENANT_ID: "M2QyYzg5YzQtNDc2Mi00NDQxLTgxODUtNTA1YmVlZGFmN2Fm"
-  API_CLIENT_ID: "NzIxMjBiZjYtMjJlZC00MThiLWFkMzAtZjdlZDFhYjY1NDUw"
-  API_CLIENT_SECRET: "Q1Y3OFF+dC5RRmRWZzdSVGlDTm9USUdvVzQ0VHR3VUNKXzF0X2NwQw=="
-  SQL_PASSWORD: "eFA5QGoya0w1I3NEN2ZaOHFFMyR0UjZtVjE="
+  API_TENANT_ID: ""
+  API_CLIENT_ID: ""
+  API_CLIENT_SECRET: ""
+  SQL_PASSWORD: "="
 
 
   
